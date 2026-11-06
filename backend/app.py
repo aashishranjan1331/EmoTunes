@@ -32,7 +32,7 @@ CORS(app, resources={
     r"/analyze": {
         "origins": [
             "http://localhost:5173",
-            "https://your-frontend.vercel.app"
+            "https://emo-tunes-wine.vercel.app"
         ]
     }
 })
