@@ -35,6 +35,12 @@ app.use((err, _req, res, _next) => {
 try {
   await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/emotunes');
   console.log('Connected to MongoDB');
+  app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "EmoTunes Backend Server Running!"
+    });
+});
   app.listen(PORT, () => console.log(`EmoTunes API running at http://localhost:${PORT}`));
 } catch (error) {
   console.error('Could not connect to MongoDB:', error.message);
