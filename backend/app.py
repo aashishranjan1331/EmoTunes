@@ -28,7 +28,14 @@ LIFT_MOOD = {
     "neutral": ["upbeat pop", "good vibes", "feel good indie"],
 }
 app = Flask(__name__)
-CORS(app, resources={r"/analyze": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}})
+CORS(app, resources={
+    r"/analyze": {
+        "origins": [
+            "http://localhost:5173",
+            "https://your-frontend.vercel.app"
+        ]
+    }
+})
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
 
 
