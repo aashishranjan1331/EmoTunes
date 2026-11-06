@@ -1,0 +1,51 @@
+/* Signed-in user name in the top bar */
+.user-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+  background: rgba(5, 150, 105, 0.12); color: #047857; border-radius: 999px;
+  font-weight: 600; font-size: 0.9rem; max-width: 180px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Mood history page */
+.history-page { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.history-card {
+  width: 100%; max-width: 860px; background: #fff; border-radius: 24px;
+  padding: 28px; box-shadow: 0 18px 50px rgba(30, 41, 59, 0.12);
+}
+.history-card h2 { margin: 0 0 4px; font-size: 1.25rem; color: #1e1b2e; }
+.history-sub { margin: 0 0 20px; color: #6b7280; font-size: 0.95rem; }
+.history-sub strong { color: #059669; text-transform: capitalize; }
+.history-status { color: #4b5563; }
+
+.week-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; align-items: end; }
+.week-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.week-bar {
+  width: 100%; max-width: 56px; height: 190px; background: #f1f5f9; border-radius: 14px;
+  display: flex; flex-direction: column-reverse; overflow: hidden;
+}
+.week-seg { display: block; width: 100%; }
+.week-col b { font-size: 0.9rem; color: #1e1b2e; min-height: 1.1em; }
+.week-col small { color: #6b7280; font-size: 0.8rem; }
+
+.mood-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.legend-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  background: #f8fafc; border-radius: 999px; font-size: 0.9rem; color: #1e1b2e;
+  text-transform: capitalize;
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+.recent-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.recent-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background: #f8fafc; border-radius: 14px;
+}
+.recent-item strong { text-transform: capitalize; color: #1e1b2e; }
+.recent-item span { color: #6b7280; font-size: 0.88rem; }
+.recent-time { margin-left: auto; white-space: nowrap; }
+
+@media (max-width: 600px) {
+  .history-card { padding: 20px; }
+  .week-chart { gap: 6px; }
+  .week-bar { height: 150px; }
+}

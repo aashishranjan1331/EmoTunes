@@ -3,8 +3,10 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes.js';
+import moodRoutes from './routes/moodRoutes.js';
 import requireAuth from './middleware/requireAuth.js';
-
+   import passwordRoutes from './routes/passwordRoutes.js';
+  
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -18,7 +20,8 @@ app.use(express.json({ limit: '10kb' }));
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'EmoTunes API' }));
 app.use('/api/auth', authRoutes);
-
+app.use('/api/moods', moodRoutes);
+app.use('/api/auth', passwordRoutes);
 // Example protected endpoint: send the JWT as Authorization: Bearer <token>
 app.get('/api/auth/me', requireAuth, async (req, res) => {
   res.json({ user: { id: req.user.sub, email: req.user.email } });
