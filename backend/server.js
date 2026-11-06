@@ -15,7 +15,10 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+app.use(cors({
+    origin: "https://emo-tunes-wine.vercel.app",
+    credentials: true
+}));
 app.use(express.json({ limit: '10kb' }));
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'EmoTunes API' }));
