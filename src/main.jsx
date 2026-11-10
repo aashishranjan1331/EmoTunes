@@ -324,7 +324,109 @@ function App() {
 
     {page === 'about' && <main className="content-panel gradient-panel about-page"><div className="about-heading"><span className="eyebrow">A LITTLE ABOUT US</span><h1>Music meets <span>emotion.</span></h1><p>Because the right song can change the way a moment feels.</p></div><article className="about-card"><div className="about-icon"><Headphones size={32}/></div><div><h2>Emotion Based Music Player</h2><p>EmoTunes is designed to make music discovery feel more personal. Instead of manually searching through playlists, users can explore music that reflects their current mood.</p><p>Using facial-expression emotion recognition, the project aims to identify a user's emotional state and suggest suitable music. Whether you're feeling joyful, relaxed, sad, surprised, or thoughtful, EmoTunes helps you find a soundtrack for the moment.</p><p>Our goal is to bring together technology and music to create a simple, engaging, and mood-aware listening experience.</p></div></article><div className="feature-row"><div><span>01</span><b>Detect emotion</b><small>Read facial expressions with care.</small></div><div><span>02</span><b>Find your vibe</b><small>Match a mood with a music category.</small></div><div><span>03</span><b>Press play</b><small>Explore music that fits the moment.</small></div></div></main>}
 
-    {page === 'contact' && <main className="content-panel gradient-panel contact-page"><div className="section-heading"><span className="eyebrow">LET'S TALK MUSIC</span><h1>Get in <span>touch.</span></h1><p>Have a question or idea for EmoTunes? Send us a message.</p></div><form className="contact-card" onSubmit={(e)=>{e.preventDefault();setNotice('Thanks! Connect this form to a backend to receive messages.')}}><label>Your name<input required placeholder="Enter your name"/></label><label>Email address<input required type="email" placeholder="you@example.com"/></label><label>Message<textarea required rows="4" placeholder="Write your message..."/></label><button className="button button-green" type="submit">Send message <ArrowRight size={17}/></button>{notice && <p className="form-notice">{notice}</p>}</form></main>}
+
+{page === 'contact' && (
+  <main className="content-panel gradient-panel contact-page">
+    <div className="section-heading">
+      <span className="eyebrow">LET'S TALK MUSIC</span>
+      <h1>Get in <span>touch.</span></h1>
+      <p>Have a question or idea for EmoTunes? Send us a message.</p>
+    </div>
+
+    
+<form
+  className="contact-card"
+  onSubmit={async (e) => {
+    e.preventDefault();
+
+    const formElement = e.currentTarget;
+
+    setNotice('');
+    setNoticeOk(false);
+
+    const form = new FormData(formElement);
+
+    const contactData = {
+      yourName: form.get('yourName').trim(),
+      yourEmail: form.get('yourEmail').trim(),
+      message: form.get('message').trim()
+    };
+
+    try {
+      const response = await fetch(
+        `${authApi}/api/contact/send`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(contactData)
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send message');
+      }
+
+      setNoticeOk(true);
+      setNotice('Thank you! Your message has been sent successfully.');
+
+      formElement.reset();
+
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setNoticeOk(false);
+      setNotice(error.message || 'Unable to connect to server.');
+    }
+  }}
+>
+
+
+      <label>
+        Your name
+        <input
+          name="yourName"
+          type="text"
+          placeholder="Enter your name"
+          required
+        />
+      </label>
+
+      <label>
+        Email address
+        <input
+          name="yourEmail"
+          type="email"
+          placeholder="you@example.com"
+          required
+        />
+      </label>
+
+      <label>
+        Message
+        <textarea
+          name="message"
+          rows="4"
+          placeholder="Write your message..."
+          required
+        />
+      </label>
+
+      <button className="button button-green" type="submit">
+        Send message <ArrowRight size={17} />
+      </button>
+
+      {notice && (
+        <p className={noticeOk ? 'form-notice success' : 'form-notice'}>
+          {notice}
+        </p>
+      )}
+
+    </form>
+  </main>
+)}
 
     {(page === 'login' || page === 'signup') && <main className="auth-stage"><div className="auth-decoration decor-one"/><div className="auth-decoration decor-two"/><section className="auth-card"><button className="auth-brand" onClick={() => navigate('home')}><span className="brand-icon"><Music2 size={19}/></span>EmoTunes</button><div className="auth-heading"><h1>{page === 'login' ? 'Welcome back' : 'Create account'}</h1><p>{page === 'login' ? 'Your next favorite song is waiting.' : 'Start your own mood soundtrack.'}</p></div><form onSubmit={(e) => handleAuth(e, page)}>
       {page === 'signup' && <label className="input-wrap"><User size={18}/><input name="name" type="text" placeholder="Enter your full name" autoComplete="name" minLength="2" required/></label>}

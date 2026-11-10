@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import moodRoutes from './routes/moodRoutes.js';
 import requireAuth from './middleware/requireAuth.js';
    import passwordRoutes from './routes/passwordRoutes.js';
+   import contactRoutes from './routes/contactRoutes.js';
   
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,15 +17,20 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
 }
 
 app.use(cors({
-    origin: "https://emo-tunes-wine.vercel.app",
+   "origins": [
+                "http://localhost:5173",
+                "https://emo-tunes-wine.vercel.app"
+            ],
     credentials: true
 }));
 app.use(express.json({ limit: '10kb' }));
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'EmoTunes API' }));
 app.use('/api/auth', authRoutes);
+
 app.use('/api/moods', moodRoutes);
 app.use('/api/auth', passwordRoutes);
+app.use('/api/contact', contactRoutes);
 // Example protected endpoint: send the JWT as Authorization: Bearer <token>
 app.get('/api/auth/me', requireAuth, async (req, res) => {
   res.json({ user: { id: req.user.sub, email: req.user.email } });
