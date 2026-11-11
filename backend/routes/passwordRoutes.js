@@ -8,8 +8,9 @@ import User from "../models/User.js";
 const router = express.Router();
 
 // ======================================
-// 1. SMTP CONFIGURATION
-// Created lazily so process.env is already loaded (dotenv) when first used
+// 1. MAIL CONFIGURATION
+// - If BREVO_API_KEY is set  -> send through Brevo's HTTPS API (works on hosts that block SMTP)
+// - Otherwise                -> fall back to SMTP (Gmail), e.g. for localhost
 // ======================================
 
 let transporter = null;
@@ -44,6 +45,48 @@ function getTransporter() {
         .catch((e) => console.error("SMTP verify failed:", e.message));
 
     return transporter;
+}
+
+// "EmoTunes <me@gmail.com>"  ->  { name: "EmoTunes", email: "me@gmail.com" }
+function parseFrom(value) {
+    const match = String(value).match(/^(.*)<([^>]+)>\s*$/);
+    if (match) {
+        return {
+            name: match[1].trim().replace(/^["']|["']$/g, "") || "EmoTunes",
+            email: match[2].trim()
+        };
+    }
+    return { name: "EmoTunes", email: String(value).trim() };
+}
+
+// Send through Brevo's REST API (plain HTTPS, port 443)
+async function sendWithBrevo({ from, to, subject, text, html }) {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+            "api-key": clean(process.env.BREVO_API_KEY),
+            "Content-Type": "application/json",
+            accept: "application/json"
+        },
+        body: JSON.stringify({
+            sender: parseFrom(from),
+            to: [{ email: to }],
+            replyTo: { email: parseFrom(from).email },
+            subject,
+            textContent: text,
+            htmlContent: html
+        })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            `Brevo ${response.status}: ${data.message || JSON.stringify(data)}`
+        );
+    }
+
+    console.log("Brevo mail accepted, messageId:", data.messageId);
 }
 
 
@@ -89,23 +132,12 @@ const hash = (token) =>
 // ======================================
 
 async function sendResetLink(email, link) {
-    const t = getTransporter();
-
-    if (!t) {
-        console.log(`[Password Reset] SMTP not configured for ${email}`);
-        return;
-    }
-
     const from =
         clean(process.env.MAIL_FROM) || clean(process.env.SMTP_USER);
 
-    const info = await t.sendMail({
-        from,
-        to: email,
-        replyTo: from,
-        subject: "Reset Your EmoTunes Password",
+    const subject = "Reset Your EmoTunes Password";
 
-        text: `Hello,
+    const text = `Hello,
 
 We received a request to reset your EmoTunes password.
 
@@ -115,15 +147,37 @@ ${link}
 If you did not request this, please ignore this email.
 
 Regards,
-EmoTunes Team`,
+EmoTunes Team`;
 
-        html: `
+    const html = `
             <p>Hello,</p>
             <p>We received a request to reset your EmoTunes password.</p>
             <p><a href="${link}">Reset your password</a> (valid for 30 minutes)</p>
             <p>Or copy this link into your browser:<br>${link}</p>
             <p>If you did not request this, please ignore this email.</p>
-            <p>Regards,<br>EmoTunes Team</p>`
+            <p>Regards,<br>EmoTunes Team</p>`;
+
+    // Preferred: Brevo HTTPS API (not blocked by hosting providers)
+    if (process.env.BREVO_API_KEY) {
+        await sendWithBrevo({ from, to: email, subject, text, html });
+        return;
+    }
+
+    // Fallback: SMTP (works locally)
+    const t = getTransporter();
+
+    if (!t) {
+        console.log(`[Password Reset] No mail provider configured for ${email}`);
+        return;
+    }
+
+    const info = await t.sendMail({
+        from,
+        to: email,
+        replyTo: from,
+        subject,
+        text,
+        html
     });
 
     console.log(
@@ -185,7 +239,7 @@ router.post("/forgot-password", async (req, res) => {
 
             const link = `${base}/?reset=${token}`;
 
-            // Wait for the mail to be handed to SMTP before responding
+            // Wait for the mail to be handed to the provider before responding
             try {
                 await sendResetLink(user.email, link);
             } catch (mailError) {
