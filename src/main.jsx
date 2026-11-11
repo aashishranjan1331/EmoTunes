@@ -6,9 +6,9 @@ import './history.css';
 import './welcome.css';
 import './profile.css';
 import './theme.css';
-import aashishPhoto from './photo/aashish.jpeg';
-import yashwantPhoto from './photo/yashwant.jpeg';
-import dikshitPhoto from './photo/dikshit.jpeg';
+// import aashishPhoto from './photo/aashish.jpeg';
+// import yashwantPhoto from './photo/yashwant.jpeg';
+// import dikshitPhoto from './photo/dikshit.jpeg';
 
 const EMOTION_COLORS = {
   happy: '#facc15', sad: '#60a5fa', angry: '#ef4444', fear: '#a78bfa',
