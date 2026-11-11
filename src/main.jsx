@@ -60,7 +60,15 @@ function App() {
       {theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}
     </button>
   );
-  const navigate = (next) => { if (next === 'player') { setCameraOn(true); setSnapshot(''); } setPage(next); setNotice(''); setNoticeOk(false); setMobileMenu(false); setAccountOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+const navigate = (next, { replace = false } = {}) => {
+  if (next === 'player') { setCameraOn(true); setSnapshot(''); }
+  setPage(next); setNotice(''); setNoticeOk(false); setMobileMenu(false); setAccountOpen(false);
+  const url = `${window.location.pathname}${next === 'reset' ? window.location.search : ''}#/${next}`;
+  if (window.location.hash !== `#/${next}`) {
+    window.history[replace ? 'replaceState' : 'pushState']({ page: next }, '', url);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+               };
   const savedUser = (() => { try { return JSON.parse(localStorage.getItem('emotunesUser') || 'null'); } catch { return null; } })();
   const loggedIn = Boolean(localStorage.getItem('emotunesToken'));
   const firstName = savedUser?.name ? savedUser.name.split(' ')[0] : '';
