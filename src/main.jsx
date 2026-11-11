@@ -25,10 +25,15 @@ const developers = [
   { name: 'Yashwant Singh', role: 'Front-End Web Developer', photo: yashwantPhoto },
   { name: 'Dikshit Goyal', role: 'Back-End Web Developer', photo: dikshitPhoto },
 ];
+const PAGES = ['home','about','developers','contact','login','signup','forgot','reset','profile','welcome','player'];
+const pageFromHash = () => {
+  const p = window.location.hash.replace(/^#\/?/, '');
+  return PAGES.includes(p) ? p : 'home';
+};
 
 function App() {
   const resetToken = new URLSearchParams(window.location.search).get('reset') || '';
-  const [page, setPage] = useState(resetToken ? 'reset' : 'home');
+  const [page, setPage] = useState(resetToken ? 'reset' : pageFromHash());
   const [noticeOk, setNoticeOk] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -60,7 +65,7 @@ function App() {
       {theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}
     </button>
   );
-const navigate = (next, { replace = false } = {}) => {
+  const navigate = (next, { replace = false } = {}) => {
   if (next === 'player') { setCameraOn(true); setSnapshot(''); }
   setPage(next); setNotice(''); setNoticeOk(false); setMobileMenu(false); setAccountOpen(false);
   const url = `${window.location.pathname}${next === 'reset' ? window.location.search : ''}#/${next}`;
@@ -68,11 +73,22 @@ const navigate = (next, { replace = false } = {}) => {
     window.history[replace ? 'replaceState' : 'pushState']({ page: next }, '', url);
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
-               };
+};
+ 
   const savedUser = (() => { try { return JSON.parse(localStorage.getItem('emotunesUser') || 'null'); } catch { return null; } })();
   const loggedIn = Boolean(localStorage.getItem('emotunesToken'));
   const firstName = savedUser?.name ? savedUser.name.split(' ')[0] : '';
   // Close the account dropdown when clicking outside it or pressing Escape
+  useEffect(() => {
+  const onPop = () => {
+    const p = pageFromHash();
+    if (p === 'player') { setCameraOn(true); setSnapshot(''); }
+    setPage(p); setNotice(''); setNoticeOk(false); setMobileMenu(false); setAccountOpen(false);
+    window.scrollTo(0, 0);
+  };
+  window.addEventListener('popstate', onPop);
+  return () => window.removeEventListener('popstate', onPop);
+}, []);
   useEffect(() => {
     if (!accountOpen) return undefined;
     const onClick = (e) => { if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false); };
